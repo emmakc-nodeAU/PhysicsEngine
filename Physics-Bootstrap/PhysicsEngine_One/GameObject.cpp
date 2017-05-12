@@ -66,7 +66,7 @@ void GameObject::DebugPhysicsRender()
 			transform[0] = glm::vec4(right, 0);
 			transform[1] = glm::vec4(up, 0);
 			transform[2] = glm::vec4(forward, 0);
-			transform[3] = glm::vec4(pPlane->GetDistanceFromOrigin(), 0, 0, 1);
+			transform[3] = glm::vec4(pPlane->GetDistanceFromOrigin() * pPlane->GetNormal(), 1);
 			// Position: direction relative to rotation, local direction.
 			// eg. Move along normal to get right position, move along x axis.
 
