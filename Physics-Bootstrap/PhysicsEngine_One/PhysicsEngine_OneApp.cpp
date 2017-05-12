@@ -6,6 +6,7 @@
 
 #include "PhysicsObject.h"
 #include "PhysicsSphereShape.h"
+#include "PhysicsPlaneShape.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -36,18 +37,23 @@ bool PhysicsEngine_OneApp::startup() {
 
 	m_physicsScene = new PhysicsScene();
 	// Apply Gravity
-	m_physicsScene->SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));	// horizontal force
+	//m_physicsScene->SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));	// horizontal force
 	// Create Sphere
 	m_demoGameObject = new GameObject();
 	// Passes in Object and mass
 	PhysicsObject* demoPhysicsObject = new PhysicsObject(5.0f);
 
 	// New shape: now include physicsSphereShape: size
-	demoPhysicsObject->AddShape(new PhysicsSphereShape(0.5f));	// Sets size, not creating an actual object.
-	// Sphere
+	// BALL part 1: turned off whilst plane one
+	//demoPhysicsObject->AddShape(new PhysicsSphereShape(0.5f));	// Sets size, not creating an actual object.
+
+	// PLANE
+	demoPhysicsObject->AddShape(new PhysicsPlaneShape(glm::vec3(1,0,0) , -30.0f));
+
 	m_physicsScene->Add(demoPhysicsObject);
 	m_demoGameObject->SetPhysicsObject(demoPhysicsObject);
-	m_demoGameObject->GetPhysicsObject()->SetVelocity(glm::vec3(10.0f, 25.0f, 0.0f));	// Parobolic Arc: Fire ball with projection arc added.
+	// BALL: part 2 
+	//m_demoGameObject->GetPhysicsObject()->SetVelocity(glm::vec3(10.0f, 25.0f, 0.0f));	// Parobolic Arc: Fire ball with projection arc added.
 
 	return true;
 }

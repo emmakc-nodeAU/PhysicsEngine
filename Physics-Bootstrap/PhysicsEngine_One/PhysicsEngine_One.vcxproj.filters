@@ -30,9 +30,6 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PhysicsPlaneObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PhysicsEngine_OneApp.h">
@@ -53,7 +50,10 @@
     <ClInclude Include="PhysicsSphereShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PhysicsPlaneObject.h">
+    <ClInclude Include="PhysicsAABBShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsPlaneShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

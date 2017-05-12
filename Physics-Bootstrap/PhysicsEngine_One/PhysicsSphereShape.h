@@ -20,4 +20,4 @@ private:
 
 // create one for planes
 // create one of these for AABB
-// instea do radius - extends, direction or distrance for type of object.
+// instead of radius - extends, direction or distance for type of object.
