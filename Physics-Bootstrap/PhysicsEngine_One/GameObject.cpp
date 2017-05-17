@@ -81,9 +81,11 @@ void GameObject::DebugPhysicsRender()
 		case PhysicsShape::ShapeType::AABB:
 		{
 			PhysicsAABBShape* pAABB = (PhysicsAABBShape*)pShape;
-			//glm::vec3 extents = pAABB->GetExtents();
 			//Do the same with height/length
 			aie::Gizmos::addAABB(position, pAABB->GetExtents(), glm::vec4(0, 1, 0, 1));
+
+
+
 			break;
 		}
 		case PhysicsShape::ShapeType::Sphere:

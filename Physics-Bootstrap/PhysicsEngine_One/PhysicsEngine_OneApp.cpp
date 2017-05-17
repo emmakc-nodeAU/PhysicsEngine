@@ -7,6 +7,7 @@
 #include "PhysicsObject.h"
 #include "PhysicsSphereShape.h"
 #include "PhysicsPlaneShape.h"
+#include "PhysicsAABBShape.h"
 
 using glm::vec3;
 using glm::vec4;
