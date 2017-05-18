@@ -4,10 +4,16 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include "PhysicsScene.h"
+
+#include "GameObject.h"
+
 #include "PhysicsObject.h"
 #include "PhysicsSphereShape.h"
 #include "PhysicsPlaneShape.h"
 #include "PhysicsAABBShape.h"
+
+#include "PhysicsCollision.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -32,43 +38,68 @@ bool PhysicsEngine_OneApp::startup() {
 	// initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
 
-	// create simple camera transforms
-	m_viewMatrix = glm::lookAt(vec3(0,0,100), vec3(0), vec3(0, 1, 0));
+	// CAMERA: Simple transforms
+	m_viewMatrix = glm::lookAt(vec3(0,0,20), vec3(0), vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
+	/*
+	--- PHYSICS ENGINE ---
+	---  Correct Order ---
+	1. CREATE: Scene
+		A. APPLY: Forces to Scene: Gravity
+	2. CREATE: New GameObject: Sphere, Plane, demoGameObject
+	3. CREATE: New PhysicsObject
+		A. SET PhysicsObject to GameObject: Size, Mass, Position, Velocity
+			i.	 Set SetPosition:
+			ii.  Set Object bounds: AddShape:(Sphere, Plane, AABB)
+			iii. Set Velocity: eg. arcs
+		B. SET Static: Moving True/False
+	4. ADD: GameObjects to Scene: m_ball, m_floor, m_demoGameObject
+
+	*/
+
+	// 1. SCENE:
 	m_physicsScene = new PhysicsScene();
-	// Apply Gravity
-	//m_physicsScene->SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));	// horizontal force
-	// Create Sphere
-	m_demoGameObject = new GameObject();
-	// Passes in Object and mass
-	PhysicsObject* demoPhysicsObject = new PhysicsObject(5.0f);
 
-	// New shape: now include physicsSphereShape: size
-	// BALL part 1: turned off whilst plane one
-	//demoPhysicsObject->AddShape(new PhysicsSphereShape(0.5f));	// Sets size, not creating an actual object.
+	// 1.A: GLOBAL SCENE FORCES: Gravity
+	m_physicsScene->SetGravity(glm::vec3(0.0f, -9.8f, 0.0f));	// horizontal force
 
-	// PLANE
-	demoPhysicsObject->AddShape(new PhysicsPlaneShape(glm::vec3(1,0,0) , -30.0f));
+	// 2. PLANE: FLOOR
+	m_floor = new GameObject();
+	m_floor->SetPhysicsObject(new PhysicsObject(std::numeric_limits<float>().max())); // Mass set to max
+	m_floor->GetPhysicsObject()->AddShape(new PhysicsPlaneShape(glm::vec3(0, 1, 0), 0));
+	m_floor->GetPhysicsObject()->SetIsStatic(true);	// Floor will not move.
 
-	m_physicsScene->Add(demoPhysicsObject);
-	m_demoGameObject->SetPhysicsObject(demoPhysicsObject);
-	// BALL: part 2 
-	//m_demoGameObject->GetPhysicsObject()->SetVelocity(glm::vec3(10.0f, 25.0f, 0.0f));	// Parobolic Arc: Fire ball with projection arc added.
+	// 2. SPHERE: BALL
+	m_ball = new GameObject();
+	m_ball->SetPhysicsObject(new PhysicsObject(2.0f));
+	m_ball->GetPhysicsObject()->SetPosition(glm::vec3(0, 5, 0));
+	m_ball->GetPhysicsObject()->AddShape(new PhysicsSphereShape(1.0f));
+	//m_ball->GetPhysicsObject()->SetVelocity(glm::vec3(10.0f, 25.0f, 0.0f)); // Parobolic Arc: Fire ball with projection arc.
+	m_ball->GetPhysicsObject()->SetIsStatic(false);
+
+	// 2. demoGameObject: Plane
+	// CREATE: Shape: Create Sphere	
+	//m_demoGameObject = new GameObject();
+	//PhysicsObject* demoPhysicsObject = new PhysicsObject(5.0f);
+	//demoPhysicsObject->AddShape(new PhysicsPlaneShape(glm::vec3(1,0,0) , -30.0f));
+	//m_demoGameObject->SetPhysicsObject(demoPhysicsObject);
+
+	// 4. ADD GameObjects to the Scene
+	//m_physicsScene->Add(demoPhysicsObject);
+	m_physicsScene->Add(m_floor->GetPhysicsObject());
+	m_physicsScene->Add(m_ball->GetPhysicsObject());
 
 	return true;
 }
 
 void PhysicsEngine_OneApp::shutdown() {
 
-	delete m_demoGameObject;
 	delete m_physicsScene;
 	Gizmos::destroy();
 }
 
 void PhysicsEngine_OneApp::update(float deltaTime) {
-
-
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
@@ -93,6 +124,14 @@ void PhysicsEngine_OneApp::update(float deltaTime) {
 
 	m_physicsScene->Update(deltaTime);
 
+	// ADD Physics Collision Check:
+	PhysicsCollision::CollisionInfo collisionInfo;
+	bool wasCollision = PhysicsCollision::CheckCollision(m_floor->GetPhysicsObject(), m_ball->GetPhysicsObject(), collisionInfo);
+	if (wasCollision)
+	{
+		int i = 3;
+	}
+	
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 
@@ -108,9 +147,10 @@ void PhysicsEngine_OneApp::draw() {
 	// update perspective based on screen size
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
 
-
-	//REDSPHERE
-	m_demoGameObject->DebugPhysicsRender();
+	// DRAW: GameObjects
+	//m_demoGameObject->DebugPhysicsRender();
+	m_ball->DebugPhysicsRender();
+	m_floor->DebugPhysicsRender();
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 }

@@ -28,6 +28,8 @@ public:
 
 protected:
 	PhysicsScene* m_physicsScene;
+	GameObject* m_ball;	// previous demogameobject
+	GameObject* m_floor;
 	GameObject* m_demoGameObject;
 	// camera transforms
 	glm::mat4	m_viewMatrix;

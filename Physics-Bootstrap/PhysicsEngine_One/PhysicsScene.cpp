@@ -1,5 +1,6 @@
 #include "PhysicsScene.h"
 #include "PhysicsObject.h"
+#include "PhysicsCollision.h"
 
 // Physics scene:
 // Container to hold a type of object
@@ -36,13 +37,35 @@ void PhysicsScene::Remove(PhysicsObject * objectToRemove)
 	}
 }
 
+//PhysicsCollision::CollisionInfo collisionInfo;
+
 void PhysicsScene::Update(float deltaTime)
 {
 	for (PhysicsObject* object : m_physicsObjects)
 	{
-		//object->AddForce();	//AddForce.ForceType
+		// Static check
+		if (!object->GetIsStatic())
+		{
 		object->AddAcceleration(m_gravity);
-		object->Update(deltaTime); // not yet written
+		object->Update(deltaTime);
+		}
+	}
+	PhysicsCollision::CollisionInfo collisionInfo;
+
+	for (auto objInteratorOne = m_physicsObjects.begin();
+		objInteratorOne != m_physicsObjects.end();
+		objInteratorOne++)
+	{
+		for (auto objInteratorTwo = std::next(objInteratorOne);
+			objInteratorTwo != m_physicsObjects.end();
+			objInteratorTwo++)
+		{
+			bool wasCollision = PhysicsCollision::CheckCollision(*objInteratorOne, *objInteratorTwo, collisionInfo);
+			if (wasCollision)
+			{
+				PhysicsCollision::ResolveCollision(*objInteratorOne, *objInteratorTwo, collisionInfo);
+			}
+		}
 	}
 }
 

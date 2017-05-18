@@ -26,6 +26,7 @@ public:
 	void AddForce(const glm::vec3 force);
 	void AddAcceleration(const glm::vec3 acceleration);
 	void AddVelocity(const glm::vec3 velocity);
+
 	void Update(float deltaTime);
 
 	void AddShape(PhysicsShape* shape);
@@ -33,11 +34,17 @@ public:
 	
 	PhysicsShape* GetShape() const;
 
+	// Remains still: Eg. we dont want the floor to move/accelerate
+	void SetIsStatic(bool isStatic) { m_isStatic = isStatic; }
+	bool GetIsStatic() const { return m_isStatic; }
 
 private:
+	bool m_isStatic;
+
 	glm::vec3 m_position;
 	float	  m_mass;
 	glm::vec3 m_velocity;
+
 	glm::vec3 m_force;	// apply every frame, to continuely affect object.
 	glm::vec3 m_acceleration;
 

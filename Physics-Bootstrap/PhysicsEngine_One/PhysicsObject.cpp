@@ -12,6 +12,7 @@ PhysicsObject::PhysicsObject(float mass)
 	, m_force(0.0f,0.0f,0.0f)
 	, m_acceleration (0.0f, 0.0f, 0.0f)
 	, m_shape(nullptr)
+	, m_isStatic(false)
 {
 }
 PhysicsObject::~PhysicsObject()
@@ -50,8 +51,10 @@ glm::vec3 PhysicsObject::GetVelocity() const
 
 void PhysicsObject::AddForce(const glm::vec3 force)
 {
-	m_force += force;	// accumulate all forces in a frame, in update each force will be used to calucaute acceleration.
-	// once acceralteion found, then cal velocity and fro mvelocity we calc position.
+	m_force += force;	
+	// Accumulate all forces in a frame:
+	// Acceleration = In update: each force is used to calculate acceleration
+	// Velocity		= Calculate position
 }
 
 void PhysicsObject::AddAcceleration(const glm::vec3 acceleration)
@@ -66,7 +69,7 @@ void PhysicsObject::AddVelocity(const glm::vec3 velocity)
 
 void PhysicsObject::Update(float deltaTime)
 {
-	// Calucate getting things to move.
+	// Calculate getting things to move.
 	// first cal the acceleration
 	//glm::vec3 acceleration = m_force / m_mass; / /replaced by below:
 	m_acceleration += m_force / m_mass;

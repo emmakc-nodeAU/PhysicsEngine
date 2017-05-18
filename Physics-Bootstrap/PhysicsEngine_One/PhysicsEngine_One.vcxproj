@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="PhysicsCollision.cpp" />
     <ClCompile Include="PhysicsEngine_OneApp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
@@ -98,6 +99,7 @@
   <ItemGroup>
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="PhysicsAABBShape.h" />
+    <ClInclude Include="PhysicsCollision.h" />
     <ClInclude Include="PhysicsEngine_OneApp.h" />
     <ClInclude Include="PhysicsObject.h" />
     <ClInclude Include="PhysicsPlaneShape.h" />
