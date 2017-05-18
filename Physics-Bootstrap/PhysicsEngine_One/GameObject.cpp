@@ -25,9 +25,9 @@ void GameObject::DebugPhysicsRender()
 			// Sphere
 			// Plane
 			// AABB
-
 		default:
 			break;
+
 		case PhysicsShape::ShapeType::Plane:
 		{
 			//Take Physics Shape and pass into type: Plane
@@ -82,10 +82,7 @@ void GameObject::DebugPhysicsRender()
 		{
 			PhysicsAABBShape* pAABB = (PhysicsAABBShape*)pShape;
 			//Do the same with height/length
-			aie::Gizmos::addAABB(position, pAABB->GetExtents(), glm::vec4(0, 1, 0, 1));
-
-			// EMMA WAS HERE AT 2:09PM ////////////////////////////////////////
-
+			aie::Gizmos::addAABBFilled(position, pAABB->GetExtents(), glm::vec4(0, 1, 0, 1));
 			break;
 		}
 		case PhysicsShape::ShapeType::Sphere:

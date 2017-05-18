@@ -5,6 +5,7 @@
 
 class PhysicsAABBShape : public PhysicsShape
 {
+public:
 	PhysicsAABBShape() = delete;
 	PhysicsAABBShape(float extents, float width, float height)
 		: PhysicsShape(PhysicsShape::ShapeType::AABB)
