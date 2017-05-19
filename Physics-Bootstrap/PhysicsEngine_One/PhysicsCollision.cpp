@@ -1,8 +1,11 @@
 #include "PhysicsCollision.h"
 #include "PhysicsShape.h"
 #include "PhysicsObject.h"
+
 #include "PhysicsPlaneShape.h"
 #include "PhysicsSphereShape.h"
+#include "PhysicsAABBShape.h"
+
 #include <glm\glm.hpp>
 
 
@@ -39,6 +42,18 @@ bool PhysicsCollision::CheckCollision(const PhysicsObject * obj1, const PhysicsO
 		return collisionFunctionArray[index](obj1, obj2, collisionInfo);
 	}
 	return false;
+}
+
+bool PhysicsCollision::CheckAABBSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
+{
+	/*
+	Formula:	AABB v Sphere
+
+	*/
+
+	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj1->GetShape();
+	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj2->GetShape();
+
 }
 
 void PhysicsCollision::ResolveCollision(PhysicsObject * obj1, PhysicsObject * obj2, CollisionInfo& collisionInfo)
@@ -95,8 +110,12 @@ void PhysicsCollision::HandleVelocityChange(PhysicsObject * obj1, PhysicsObject 
 
 	// Collision Response: Hit me
 	// Formula: new V = old v - J value / our mass * collision normal
+	// Static object doesnt have mass, or infinite mass or zero.
 	glm::vec3 obj1NewVelocity = obj1->GetVelocity() - ((j / obj1->GetMass()) * collisionInfo.normal);
 	glm::vec3 obj2NewVelocity = obj2->GetVelocity() + ((j / obj2->GetMass()) * collisionInfo.normal);
+	// if object static, else 1/mass.
+	//* objA / mass  modify the second part of equation above.
+
 	// Assign new Velocity to objects:
 	obj1->SetVelocity(obj1NewVelocity);
 	obj2->SetVelocity(obj2NewVelocity);
@@ -115,12 +134,14 @@ void PhysicsCollision::HandleSeparation(PhysicsObject * obj1, PhysicsObject * ob
 	float totalSystemMass = obj1->GetMass() + obj2->GetMass();
 	float obj1Offset = collisionInfo.interceptDistance * (obj2->GetMass() / totalSystemMass);
 	float obj2Offset = collisionInfo.interceptDistance * (obj1->GetMass() / totalSystemMass);
-	// Apply formula Pa: Obj1 && Pb: Obj2
+	// Calculate Offset: Apply formula Pa: Obj1 && Pb: Obj2. if dynamic, set to 0 in static check.
 	glm::vec3 obj1NewPosition = obj1->GetPosition() - (obj1Offset * collisionInfo.normal);
 	glm::vec3 obj2NewPosition = obj2->GetPosition() - (obj2Offset * collisionInfo.normal);
 
 	obj1->SetPosition(obj1NewPosition);
 	obj2->SetPosition(obj2NewPosition);
+
+	//check object static or ! = move amount to RB class
 }
 
 bool PhysicsCollision::CheckPlaneSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo& collisionInfo)
@@ -160,4 +181,33 @@ bool PhysicsCollision::CheckSpherePlaneCollision(const PhysicsObject * obj1, con
 	// Substract planes distance from origin
 
 	return collisionInfo.wasCollision;
+}
+
+bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
+{
+	/*
+	Formula elements:	SPHERE v SPHERE
+	1. Normalise velocities vectors
+	2. Dot Product of Normalized vectors: (||v1||.||v2|| = d)
+	3. Multip ly v1,v2 by dot product (v1*d = v3, v2*d = v4)
+	4. Subtract v3, v4 from v1,v2 (v1-v3 = v5, v2 - v4 = v6)
+	5. S1 velocity = v5 + v4
+	6. S1 velocity = v6 + v3
+	*/
+	// PHYSICS OBJECTS
+	PhysicsSphereShape* pSphere1 = (PhysicsSphereShape*)obj1->GetShape();
+	PhysicsSphereShape* pSphere2 = (PhysicsSphereShape*)obj2->GetShape();
+	// 1. Normalize
+	float obj1Velocity;
+
+	obj1->GetVelocity();
+	// 2. Dot Product of Normalized vectors : (|| v1 || . || v2 || = d)
+	
+	// 3. Multiply v1, v2 by dot product(v1*d = v3, v2*d = v4)
+
+	// 4. Subtract v3, v4 from v1, v2(v1 - v3 = v5, v2 - v4 = v6)
+
+	// 5. S1 velocity = v5 + v4
+
+	// 6. S1 velocity = v6 + v3
 }

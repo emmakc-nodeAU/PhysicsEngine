@@ -16,23 +16,37 @@ namespace PhysicsCollision
 		float interceptDistance;
 	};
 
+	// Sphere v Sphere - refer to miguelcasillas.com
+	struct SphereToSphere
+	{
+		glm::vec3 m_vectorCenter;
+		float m_fRadius;
+	};
+
 	bool CheckCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// Check dir of collision (using Normal and intersect distance)
 	// Specific Shape Collision Functions: Each Type
+
 	// 1. Sphere v Plane
 	bool CheckSpherePlaneCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
-
 	// 2. Sphere v Sphere
+	bool CheckSphereSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// 3. Sphere v AABB
+//	bool CheckSphereAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
 	// 4. Plane v Plane
+//	bool CheckPlanePlaneCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// 5. Plane v Sphere
 	bool CheckPlaneSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// 6. Plane v AABB
+//	bool CheckPlaneAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
 	// 7. AABB v AABB
+//	bool CheckAABBAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// 8. AABB v Sphere
+//	bool CheckAABBSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// 9. AABB v Plane
+//	bool CheckAABBPlaneCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
 	void ResolveCollision(PhysicsObject* obj1, PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	void HandleVelocityChange(PhysicsObject* obj1, PhysicsObject* obj2, CollisionInfo& collisionInfo);
