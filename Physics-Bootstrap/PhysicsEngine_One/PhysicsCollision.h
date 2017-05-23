@@ -34,18 +34,16 @@ namespace PhysicsCollision
 	// 3. Sphere v AABB
 //	bool CheckSphereAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
-	// 4. Plane v Plane
-//	bool CheckPlanePlaneCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
-	// 5. Plane v Sphere
+	// 4. Plane v Sphere
 	bool CheckPlaneSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
-	// 6. Plane v AABB
+	// 5. Plane v AABB
 //	bool CheckPlaneAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
-	// 7. AABB v AABB
+	// 6. AABB v AABB
 //	bool CheckAABBAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
-	// 8. AABB v Sphere
-//	bool CheckAABBSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
-	// 9. AABB v Plane
+	// 7. AABB v Sphere
+	bool CheckAABBSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
+	// 8. AABB v Plane
 //	bool CheckAABBPlaneCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
 	void ResolveCollision(PhysicsObject* obj1, PhysicsObject* obj2, CollisionInfo& collisionInfo);

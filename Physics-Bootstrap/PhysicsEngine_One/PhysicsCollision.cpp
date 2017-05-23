@@ -53,7 +53,13 @@ bool PhysicsCollision::CheckAABBSphereCollision(const PhysicsObject * obj1, cons
 
 	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj1->GetShape();
 	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj2->GetShape();
-
+	
+	bool wasCollision = CheckAABBSphereCollision(obj2, obj1, collisionInfo);
+	if (wasCollision)
+	{
+		collisionInfo.normal = -collisionInfo.normal;
+	}
+	return collisionInfo.wasCollision;
 }
 
 void PhysicsCollision::ResolveCollision(PhysicsObject * obj1, PhysicsObject * obj2, CollisionInfo& collisionInfo)
@@ -75,16 +81,25 @@ void PhysicsCollision::HandleVelocityChange(PhysicsObject * obj1, PhysicsObject 
 	Elastic Kinetic Collisions = Kinetic energy before collision is equal to kinetic energy after collision
 	Friction above = zero
 	
-	Sphere v Sphere Collision
+	Formula elements:	Elastic Response
+	1. Normalise velocities vectors
+	2. Dot Product of Normalized vectors: (||v1||.||v2|| = d)
+	3. Multiply v1,v2 by dot product (v1*d = v3, v2*d = v4)
+	4. Subtract v3, v4 from v1,v2 (v1-v3 = v5, v2 - v4 = v6)
+	5. S1 velocity = v5 + v4
+	6. S1 velocity = v6 + v3
+
+	Sphere (S1) v Sphere (S2) Collision
 	Mass center = center of sphere
 	Collision type= Elastic .: no kinetic energy lost at collision
 	Formula: V1 & V2 Sphere Velocities: See slide 7/29 Collision Response and Friction
 
-	Sphere (S1) v Plane Collision
+	Sphere (S1) v Plane Collision (N)
 	Collision: Elastic: Plane Static/Rigid, Ball bounce off it, no kinetic energy lost
 	S1 = Sphere, 
 	V1 = S1's velocity before collision
 	N = Vector, unit normal of plane
+
 	Calculate Force: Newton's 3rd law: Force the Plane exerts on Sphere
 	Sphere Response Collision V2 = V1 + 2*N+(N.V1)
 	eg. 
@@ -94,7 +109,6 @@ void PhysicsCollision::HandleVelocityChange(PhysicsObject * obj1, PhysicsObject 
 	V2 .: = (1,0) + 2 * (-0.702, -0.702)+(-0.702,0)
 	V2 .: = -1.404
 	*/
-	
 
 	// TODO: Actually do this - just make them stop for now
 	//obj1->SetVelocity(glm::vec3(0, 0, 0));
@@ -186,28 +200,34 @@ bool PhysicsCollision::CheckSpherePlaneCollision(const PhysicsObject * obj1, con
 bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
 {
 	/*
-	Formula elements:	SPHERE v SPHERE
-	1. Normalise velocities vectors
-	2. Dot Product of Normalized vectors: (||v1||.||v2|| = d)
-	3. Multip ly v1,v2 by dot product (v1*d = v3, v2*d = v4)
-	4. Subtract v3, v4 from v1,v2 (v1-v3 = v5, v2 - v4 = v6)
-	5. S1 velocity = v5 + v4
-	6. S1 velocity = v6 + v3
+	Formula elements: WasCollision: SPHERE v SPHERE
+	Distance (D) is magnitude/length/size of the difference in center points (c)
+	1. D = | c1 - c2 |
+
+	Collision if distance < sum of radii (r)
+	2. bCollision = D < SumOf r
 	*/
 	// PHYSICS OBJECTS
 	PhysicsSphereShape* pSphere1 = (PhysicsSphereShape*)obj1->GetShape();
 	PhysicsSphereShape* pSphere2 = (PhysicsSphereShape*)obj2->GetShape();
-	// 1. Normalize
-	float obj1Velocity;
+	// Set C1, C2 values:
+	glm::vec3 s1CenterPoint;
+	glm::vec3 s2CenterPoint;
+	// Get C1, C2 values:
+	s1CenterPoint = (obj1->GetPosition());
+	s2CenterPoint = (obj2->GetPosition());
+	// 1. Find objects Distance: C1 - C2
+	glm::vec3 displacement = ((s1CenterPoint) - (s2CenterPoint));
+	// 2. bCollision = D < SumOf r
+		if (displacement.length < pSphere1->GetRadius() + pSphere2->GetRadius())
+		{
+			collisionInfo.wasCollision = true;
+		}
+		else
+		{
+			collisionInfo.wasCollision = false;
+		}
+	return collisionInfo.wasCollision;
 
-	obj1->GetVelocity();
-	// 2. Dot Product of Normalized vectors : (|| v1 || . || v2 || = d)
-	
-	// 3. Multiply v1, v2 by dot product(v1*d = v3, v2*d = v4)
 
-	// 4. Subtract v3, v4 from v1, v2(v1 - v3 = v5, v2 - v4 = v6)
-
-	// 5. S1 velocity = v5 + v4
-
-	// 6. S1 velocity = v6 + v3
 }
