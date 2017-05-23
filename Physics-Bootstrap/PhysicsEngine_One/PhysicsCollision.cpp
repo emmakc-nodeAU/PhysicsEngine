@@ -228,6 +228,4 @@ bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, co
 			collisionInfo.wasCollision = false;
 		}
 	return collisionInfo.wasCollision;
-
-
 }
