@@ -40,9 +40,15 @@ namespace PhysicsCollision
 //	bool CheckPlaneAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
 	// 6. AABB v AABB
+<<<<<<< HEAD
 	bool CheckAABBAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// 7. AABB v Sphere
 //	bool CheckAABBSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
+=======
+//	bool CheckAABBAABBCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
+	// 7. AABB v Sphere
+	bool CheckAABBSphereCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
+>>>>>>> c51cc66b2feaa80d8227799856464ab495468aa6
 	// 8. AABB v Plane
 //	bool CheckAABBPlaneCollision(const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 
