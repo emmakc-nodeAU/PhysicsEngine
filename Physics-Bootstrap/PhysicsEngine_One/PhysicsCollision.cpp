@@ -44,7 +44,7 @@ bool PhysicsCollision::CheckCollision(const PhysicsObject * obj1, const PhysicsO
 	return false;
 }
 
-<<<<<<< HEAD
+
 //bool PhysicsCollision::CheckAABBSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
 //{
 //	/*
@@ -56,7 +56,7 @@ bool PhysicsCollision::CheckCollision(const PhysicsObject * obj1, const PhysicsO
 //	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj2->GetShape();
 //
 //}
-=======
+
 bool PhysicsCollision::CheckAABBSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
 {
 	/*
@@ -74,7 +74,7 @@ bool PhysicsCollision::CheckAABBSphereCollision(const PhysicsObject * obj1, cons
 	}
 	return collisionInfo.wasCollision;
 }
->>>>>>> c51cc66b2feaa80d8227799856464ab495468aa6
+
 
 void PhysicsCollision::ResolveCollision(PhysicsObject * obj1, PhysicsObject * obj2, CollisionInfo& collisionInfo)
 {
@@ -271,7 +271,7 @@ bool PhysicsCollision::CheckSpherePlaneCollision(const PhysicsObject * obj1, con
 bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
 {
 	/*
-<<<<<<< HEAD
+
 	Check Elastic Collision between two Sphere surfaces:
 	Check distance between surface of spheres.
 	1. Compare length from centers of the spheres
@@ -282,20 +282,20 @@ bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, co
 	RETURN:
 	3. If DISTANCE is < SUM RADIUS, collision true.
 
-=======
+
 	Formula elements: WasCollision: SPHERE v SPHERE
 	Distance (D) is magnitude/length/size of the difference in center points (c)
 	1. D = | c1 - c2 |
 
 	Collision if distance < sum of radii (r)
 	2. bCollision = D < SumOf r
->>>>>>> c51cc66b2feaa80d8227799856464ab495468aa6
+
 	*/
 	// Object 1: Sphere
 	PhysicsSphereShape* pSphere1 = (PhysicsSphereShape*)obj1->GetShape();
 	// Object 2: Sphere
 	PhysicsSphereShape* pSphere2 = (PhysicsSphereShape*)obj2->GetShape();
-<<<<<<< HEAD
+
 
 	//DISTANCE
 	// 1. Distance Difference vector: vecd = s1.pos - s2.pos
@@ -324,7 +324,7 @@ bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, co
 		collisionInfo.wasCollision = false;
 		return false;
 	}
-=======
+
 	// Set C1, C2 values:
 	glm::vec3 s1CenterPoint;
 	glm::vec3 s2CenterPoint;
@@ -342,7 +342,7 @@ bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, co
 		{
 			collisionInfo.wasCollision = false;
 		}
->>>>>>> c51cc66b2feaa80d8227799856464ab495468aa6
+
 	return collisionInfo.wasCollision;
 }
 
