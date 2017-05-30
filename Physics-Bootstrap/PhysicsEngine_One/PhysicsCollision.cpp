@@ -44,17 +44,17 @@ bool PhysicsCollision::CheckCollision(const PhysicsObject * obj1, const PhysicsO
 	return false;
 }
 
-bool PhysicsCollision::CheckAABBSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
-{
-	/*
-	Formula:	AABB v Sphere
-
-	*/
-
-	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj1->GetShape();
-	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj2->GetShape();
-
-}
+//bool PhysicsCollision::CheckAABBSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
+//{
+//	/*
+//	Formula:	AABB v Sphere
+//
+//	*/
+//
+//	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj1->GetShape();
+//	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj2->GetShape();
+//
+//}
 
 void PhysicsCollision::ResolveCollision(PhysicsObject * obj1, PhysicsObject * obj2, CollisionInfo& collisionInfo)
 {
@@ -155,12 +155,69 @@ bool PhysicsCollision::CheckPlaneSphereCollision(const PhysicsObject * obj1, con
 	return collisionInfo.wasCollision;
 }
 
+bool PhysicsCollision::CheckAABBAABBCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
+{
+	// Object1: AABB v Object2: AABB
+	PhysicsAABBShape* pAABB1 = (PhysicsAABBShape*)obj1->GetShape();
+	PhysicsAABBShape* pAABB2 = (PhysicsAABBShape*)obj2->GetShape();
+	
+	// Check X Min/Max position
+	//obj1->GetPosition().length.x;
+	//obj1->GetPosition().length.y;
+	//obj1->GetPosition().length.z;
+	//
+	//obj2->GetPosition().length.x;
+	//obj2->GetPosition().length.y;
+	//obj2->GetPosition().length.z;
+	// Check X, Y, Z Bounds
+	glm::vec3 box1Min = obj1->GetPosition() - pAABB1->GetExtents();
+	glm::vec3 box1Max = obj1->GetPosition() + pAABB1->GetExtents();
+
+	glm::vec3 box2Min = obj2->GetPosition() - pAABB2->GetExtents();
+	glm::vec3 box2Max = obj2->GetPosition() + pAABB2->GetExtents();
+
+	// Part1: Check Collision
+	bool isCollision = (
+		box1Min.x < box2Max.x &&
+		box1Max.x > box2Min.x &&
+		box1Min.y < box2Max.y &&
+		box1Max.y > box2Min.y &&
+		box1Min.z < box2Max.z &&
+		box1Max.z > box2Min.z
+		);
+	return isCollision;
+
+	// Part2: Using the Bool result
+	// If Collision true, find where is it located x,y,z
+	if (isCollision = false)
+	{
+		collisionInfo.wasCollision = false;
+		return false;
+	}
+	else
+	{
+		collisionInfo.interceptDistance =
+				(
+				// Check X Min/Max
+				(box2Max.x - box1Max.x) < (box1Max.x - box2Min.x)
+				);
+
+		collisionInfo.wasCollision = true;
+		return true;
+	}
+
+
+}
+
 bool PhysicsCollision::CheckSpherePlaneCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo& collisionInfo)
 {
+	// Object 1: Sphere
 	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj1->GetShape();
+	// Object 2: Plane
 	PhysicsPlaneShape* pPlane = (PhysicsPlaneShape*)obj2->GetShape();
+
 	// Position: Object 1
-	// Dot production b/n Sphere and Planes Normal
+	// Dot product b/n Sphere and Planes Normal
 	float distanceFromPlane = (
 		glm::dot(obj1->GetPosition(), pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
 	if (distanceFromPlane < pSphere->GetRadius())
@@ -186,28 +243,53 @@ bool PhysicsCollision::CheckSpherePlaneCollision(const PhysicsObject * obj1, con
 bool PhysicsCollision::CheckSphereSphereCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
 {
 	/*
-	Formula elements:	SPHERE v SPHERE
-	1. Normalise velocities vectors
-	2. Dot Product of Normalized vectors: (||v1||.||v2|| = d)
-	3. Multip ly v1,v2 by dot product (v1*d = v3, v2*d = v4)
-	4. Subtract v3, v4 from v1,v2 (v1-v3 = v5, v2 - v4 = v6)
-	5. S1 velocity = v5 + v4
-	6. S1 velocity = v6 + v3
+	Check Elastic Collision between two Sphere surfaces:
+	Check distance between surface of spheres.
+	1. Compare length from centers of the spheres
+		a. Distance vector:			vecd = s1.pos - s2.pos
+		b. Find length/DISTANCE:	vecd.length = sqrtvecd.x^2 + vecd.y^2 + vecd.z^2
+	2. Sum of the radiuses:			SUMRADIUS = s1.radius + s2.radius
+
+	RETURN:
+	3. If DISTANCE is < SUM RADIUS, collision true.
+
 	*/
-	// PHYSICS OBJECTS
+	// Object 1: Sphere
 	PhysicsSphereShape* pSphere1 = (PhysicsSphereShape*)obj1->GetShape();
+	// Object 2: Sphere
 	PhysicsSphereShape* pSphere2 = (PhysicsSphereShape*)obj2->GetShape();
-	// 1. Normalize
-	float obj1Velocity;
 
-	obj1->GetVelocity();
-	// 2. Dot Product of Normalized vectors : (|| v1 || . || v2 || = d)
-	
-	// 3. Multiply v1, v2 by dot product(v1*d = v3, v2*d = v4)
+	//DISTANCE
+	// 1. Distance Difference vector: vecd = s1.pos - s2.pos
+	glm::vec3 vDistance = (obj1->GetPosition() - obj2->GetPosition());
+	// 2. Find Length: DISTANCE = vecd.length = sqrtvecd.x^2 + vecd.y^2 + vecd.z^2
+	vDistance.x = glm::sqrt(vDistance.x);
+	vDistance.y = glm::sqrt(vDistance.y);
+	vDistance.z = glm::sqrt(vDistance.z);
 
-	// 4. Subtract v3, v4 from v1, v2(v1 - v3 = v5, v2 - v4 = v6)
+	float fLength = vDistance.length();
 
-	// 5. S1 velocity = v5 + v4
+	// 3. SUM RADIUS: = s1.radius + s2.radius
+	float fSumRadius = (pSphere1->GetRadius() - pSphere2->GetRadius());
 
-	// 6. S1 velocity = v6 + v3
+	// Check Collision: Distance < SumRadius
+	if (fLength < fSumRadius)
+	{
+		// Collision true
+		collisionInfo.interceptDistance = fSumRadius;
+		collisionInfo.wasCollision = true;
+		return true;
+	}
+	else
+	{
+		// !Collision
+		collisionInfo.wasCollision = false;
+		return false;
+	}
+	return collisionInfo.wasCollision;
 }
+
+//bool PhysicsCollision::CheckSphereAABBCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
+//{
+//	return false;
+//}
