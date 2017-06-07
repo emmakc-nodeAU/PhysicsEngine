@@ -226,15 +226,15 @@ bool PhysicsCollision::CheckAABBAABBCollision(const PhysicsObject * obj1, const 
 	{
 		collisionInfo.interceptDistance =
 				(
-				// Check X Min/Max
-				(box2Max.x - box1Max.x) < (box1Max.x - box2Min.x)
+				// Check X/Y/Z Min/Max
+					((box2Max.x - box2Min.x) < (box1Max.x - box1Min.x)),
+					((box2Max.y - box2Min.y) < (box1Max.y - box1Min.y)),
+					((box2Max.z - box2Min.z) < (box1Max.z - box1Min.z))
 				);
 
 		collisionInfo.wasCollision = true;
 		return true;
 	}
-
-
 }
 
 bool PhysicsCollision::CheckSpherePlaneCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo& collisionInfo)
