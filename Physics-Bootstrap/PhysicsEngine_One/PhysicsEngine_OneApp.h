@@ -28,6 +28,7 @@ public:
 
 protected:
 	PhysicsScene* m_physicsScene;
+	GameObject* m_box;
 	GameObject* m_ball;	// previous demogameobject
 	GameObject* m_floor;
 	GameObject* m_demoGameObject;

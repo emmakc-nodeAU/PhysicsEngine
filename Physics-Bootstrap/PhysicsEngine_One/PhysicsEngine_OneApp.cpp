@@ -54,7 +54,7 @@ bool PhysicsEngine_OneApp::startup() {
 			ii.  Set Object bounds: AddShape:(Sphere, Plane, AABB)
 			iii. Set Velocity: eg. arcs
 		B. SET Static: Moving True/False
-	4. ADD: GameObjects to Scene: m_ball, m_floor, m_demoGameObject
+	4. ADD: GameObjects to Scene: m_ball, m_floor, m_box, m_demoGameObject
 
 	*/
 
@@ -78,6 +78,13 @@ bool PhysicsEngine_OneApp::startup() {
 	//m_ball->GetPhysicsObject()->SetVelocity(glm::vec3(10.0f, 25.0f, 0.0f)); // Parobolic Arc: Fire ball with projection arc.
 	m_ball->GetPhysicsObject()->SetIsStatic(false);
 
+	// 3. CUBE: BOX
+	m_box = new GameObject();
+	m_box->SetPhysicsObject(new PhysicsObject(2.0f));
+	m_box->GetPhysicsObject()->AddShape(new PhysicsAABBShape()->SetExtents(glm::vec3(2, 1, 3)));
+	m_box->GetPhysicsObject()->SetPosition(glm::vec3(0, 10, 0));
+	m_box->GetPhysicsObject()->SetIsStatic(false);
+
 	// 2. demoGameObject: Plane
 	// CREATE: Shape: Create Sphere	
 	//m_demoGameObject = new GameObject();
@@ -89,7 +96,7 @@ bool PhysicsEngine_OneApp::startup() {
 	//m_physicsScene->Add(demoPhysicsObject);
 	m_physicsScene->Add(m_floor->GetPhysicsObject());
 	m_physicsScene->Add(m_ball->GetPhysicsObject());
-
+	m_physicsScene->Add(m_box->GetPhysicsObject());
 	return true;
 }
 
@@ -126,7 +133,11 @@ void PhysicsEngine_OneApp::update(float deltaTime) {
 
 	// ADD Physics Collision Check:
 	PhysicsCollision::CollisionInfo collisionInfo;
-	bool wasCollision = PhysicsCollision::CheckCollision(m_floor->GetPhysicsObject(), m_ball->GetPhysicsObject(), collisionInfo);
+	bool wasCollision = PhysicsCollision::CheckCollision(
+		m_floor->GetPhysicsObject(), 
+		m_ball->GetPhysicsObject(), 
+		collisionInfo);
+
 	if (wasCollision)
 	{
 		int i = 3;
@@ -151,6 +162,8 @@ void PhysicsEngine_OneApp::draw() {
 	//m_demoGameObject->DebugPhysicsRender();
 	m_ball->DebugPhysicsRender();
 	m_floor->DebugPhysicsRender();
+
+	m_box->DebugPhysicsRender();
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 }
