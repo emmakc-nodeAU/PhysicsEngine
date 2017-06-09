@@ -57,7 +57,7 @@ bool PhysicsCollision::CheckAABBSphereCollision(
 	glm::vec3 box1Min = obj2->GetPosition() - pAABB->GetExtents();
 	glm::vec3 box1Max = obj2->GetPosition() + pAABB->GetExtents();
 	// CHECK POSITION: Sphere
-	glm::vec3 spherePosition = obj1->GetPosition();
+	obj1->GetPosition();
 
 	bool wasCollision = CheckAABBSphereCollision(obj2, obj1, collisionInfo);
 	if (wasCollision)
@@ -77,13 +77,23 @@ bool PhysicsCollision::CheckSphereAABBCollision(
 	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj2->GetShape();
 
 	// CHECK POSITION: Sphere
-	glm::vec3 spherePosition = obj1->GetPosition();
+	obj1->GetPosition();
+	pSphere->GetRadius();
 
 	// CHECK POSITION: AABB
 	glm::vec3 box1Min = obj2->GetPosition() - pAABB->GetExtents();
 	glm::vec3 box1Max = obj2->GetPosition() + pAABB->GetExtents();
 
 	// Formula: Dot product b/n Sphere and Extents
+	float distanceFromSphereToAABB = (
+		(glm::dot(obj1->GetPosition().x, box1Min.x)) <= obj1->GetPosition().x &&
+		(glm::dot(obj1->GetPosition().x, box1Max.x)) <= obj1->GetPosition().x &&
+		(glm::dot(obj1->GetPosition().y, box1Min.y)) <= obj1->GetPosition().y &&
+		(glm::dot(obj1->GetPosition().y, box1Max.y)) <= obj1->GetPosition().y &&
+		(glm::dot(obj1->GetPosition().z, box1Min.z)) <= obj1->GetPosition().z &&
+		(glm::dot(obj1->GetPosition().z, box1Max.z)) <= obj1->GetPosition().z
+		);
+
 	bool wasCollision = CheckSphereAABBCollision(obj2, obj1, collisionInfo);
 	if (wasCollision)
 	{

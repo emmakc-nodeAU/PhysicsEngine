@@ -81,7 +81,7 @@ bool PhysicsEngine_OneApp::startup() {
 	// 3. CUBE: BOX
 	m_box = new GameObject();
 	m_box->SetPhysicsObject(new PhysicsObject(2.0f));
-	m_box->GetPhysicsObject()->AddShape(new PhysicsAABBShape()->SetExtents(glm::vec3(2, 1, 3)));
+	//m_box->GetPhysicsObject()->AddShape(new PhysicsAABBShape()->SetExtents(glm::vec3(2, 1, 3)));
 	m_box->GetPhysicsObject()->SetPosition(glm::vec3(0, 10, 0));
 	m_box->GetPhysicsObject()->SetIsStatic(false);
 
