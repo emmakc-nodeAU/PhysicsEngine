@@ -72,8 +72,8 @@ void GameObject::DebugPhysicsRender()
 
 			// Draw object with X of 1, y and z of 1000x1000, but rotated so x dir matches transform matrix.
 			aie::Gizmos::addAABBFilled(glm::vec3(0, 0, 0), 
-				glm::vec3(1.0f, 1000.0f, 1000.0f), 
-				glm::vec4(1, 0, 1, 1),
+				glm::vec3(0.1f, 50.0f, 20.0f), 
+				glm::vec4(0, 0, 1, 1),
 				&transform);
 		}
 			break;
@@ -81,7 +81,7 @@ void GameObject::DebugPhysicsRender()
 		{
 			PhysicsAABBShape* pAABB = (PhysicsAABBShape*)pShape;
 			//Extents xyz
-			aie::Gizmos::addAABBFilled(position, pAABB->GetExtents(), glm::vec4(0, 1, 0, 1));
+			aie::Gizmos::addAABBFilled(position, pAABB->GetExtents(), glm::vec4(1, 1, 0, 0.1f));
 			break;
 		}
 		case PhysicsShape::ShapeType::Sphere:

@@ -27,9 +27,9 @@ bool PhysicsCollision::CheckCollision(const PhysicsObject * obj1, const PhysicsO
 	typedef bool(*collisionFnc) (const PhysicsObject* obj1, const PhysicsObject* obj2, CollisionInfo& collisionInfo);
 	// 2. Create: Array of the Collision Functions:
 	static collisionFnc collisionFunctionArray[] = {
-	nullptr, nullptr, CheckPlaneSphereCollision,
-	nullptr, nullptr, nullptr,
-	CheckSpherePlaneCollision, nullptr, nullptr
+	nullptr, CheckPlaneAABBCollision, CheckPlaneSphereCollision,
+	CheckAABBPlaneCollision, CheckAABBAABBCollision, CheckAABBSphereCollision,
+	CheckSpherePlaneCollision, CheckSphereAABBCollision, CheckSphereSphereCollision
 	};
 
 	// 3. Create: ShapeID index 'hash' two shapeIDs:
@@ -53,18 +53,45 @@ bool PhysicsCollision::CheckAABBSphereCollision(
 	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj1->GetShape();
 	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj2->GetShape();
 	
-	// CHECK POSITION: AABB
-	glm::vec3 box1Min = obj2->GetPosition() - pAABB->GetExtents();
-	glm::vec3 box1Max = obj2->GetPosition() + pAABB->GetExtents();
-	// CHECK POSITION: Sphere
-	obj1->GetPosition();
+	auto offset = obj2->GetPosition() - obj1->GetPosition();
 
-	bool wasCollision = CheckAABBSphereCollision(obj2, obj1, collisionInfo);
-	if (wasCollision)
+	auto extents = pAABB->GetExtents();
+	glm::vec3 edge = glm::vec3(0);
+
+	edge.x = glm::clamp(glm::dot(offset, glm::vec3(1, 0, 0)), -extents.x, extents.x);
+	edge.y = glm::clamp(glm::dot(offset, glm::vec3(0, 1, 0)), -extents.y, extents.y);
+	edge.z = glm::clamp(glm::dot(offset, glm::vec3(0, 0, 1)), -extents.z, extents.z);
+
+	auto aabbClosestPoint = obj1->GetPosition() + edge;
+
+	offset = obj2->GetPosition() - aabbClosestPoint;
+	float length = glm::length(offset);
+
+	if (length < pSphere->GetRadius() && length > 0)
 	{
-		collisionInfo.normal = -collisionInfo.normal;
+		collisionInfo.normal = glm::normalize(offset);
+		collisionInfo.interceptDistance = pSphere->GetRadius() - length;
+		collisionInfo.wasCollision = true;
 	}
+	else
+	{
+		collisionInfo.wasCollision = false;
+	}
+
 	return collisionInfo.wasCollision;
+
+	//// CHECK POSITION: AABB
+	//glm::vec3 box1Min = obj2->GetPosition() - pAABB->GetExtents();
+	//glm::vec3 box1Max = obj2->GetPosition() + pAABB->GetExtents();
+	//// CHECK POSITION: Sphere
+	//obj1->GetPosition();
+	//
+	//bool wasCollision = CheckAABBSphereCollision(obj2, obj1, collisionInfo);
+	//if (wasCollision)
+	//{
+	//	collisionInfo.normal = -collisionInfo.normal;
+	//}
+	//return collisionInfo.wasCollision;
 }
 
 bool PhysicsCollision::CheckSphereAABBCollision(
@@ -72,67 +99,139 @@ bool PhysicsCollision::CheckSphereAABBCollision(
 	const PhysicsObject * obj2, 
 	CollisionInfo & collisionInfo)
 {
-	// CREATE OBJECTS
-	PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj1->GetShape();
-	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj2->GetShape();
-
-	// CHECK POSITION: Sphere
-	obj1->GetPosition();
-	pSphere->GetRadius();
-
-	// CHECK POSITION: AABB
-	glm::vec3 box1Min = obj2->GetPosition() - pAABB->GetExtents();
-	glm::vec3 box1Max = obj2->GetPosition() + pAABB->GetExtents();
-
-	// Formula: Dot product b/n Sphere and Extents
-	float distanceFromSphereToAABB = (
-		(glm::dot(obj1->GetPosition().x, box1Min.x)) <= obj1->GetPosition().x &&
-		(glm::dot(obj1->GetPosition().x, box1Max.x)) <= obj1->GetPosition().x &&
-		(glm::dot(obj1->GetPosition().y, box1Min.y)) <= obj1->GetPosition().y &&
-		(glm::dot(obj1->GetPosition().y, box1Max.y)) <= obj1->GetPosition().y &&
-		(glm::dot(obj1->GetPosition().z, box1Min.z)) <= obj1->GetPosition().z &&
-		(glm::dot(obj1->GetPosition().z, box1Max.z)) <= obj1->GetPosition().z
-		);
-
-	bool wasCollision = CheckSphereAABBCollision(obj2, obj1, collisionInfo);
+	bool wasCollision = CheckAABBSphereCollision(obj2, obj1, collisionInfo);
 	if (wasCollision)
 	{
-		//
+		collisionInfo.normal = -collisionInfo.normal;
 	}
 	return collisionInfo.wasCollision;
+
+	//// CREATE OBJECTS
+	//PhysicsSphereShape* pSphere = (PhysicsSphereShape*)obj1->GetShape();
+	//PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj2->GetShape();
+	//
+	//// CHECK POSITION: Sphere
+	//obj1->GetPosition();
+	//pSphere->GetRadius();
+	//
+	//// CHECK POSITION: AABB
+	//glm::vec3 box1Min = obj2->GetPosition() - pAABB->GetExtents();
+	//glm::vec3 box1Max = obj2->GetPosition() + pAABB->GetExtents();
+	//
+	//// Formula: Dot product b/n Sphere and Extents
+	//float distanceFromSphereToAABB = (
+	//	(glm::dot(obj1->GetPosition().x, box1Min.x)) <= obj1->GetPosition().x &&
+	//	(glm::dot(obj1->GetPosition().x, box1Max.x)) <= obj1->GetPosition().x &&
+	//	(glm::dot(obj1->GetPosition().y, box1Min.y)) <= obj1->GetPosition().y &&
+	//	(glm::dot(obj1->GetPosition().y, box1Max.y)) <= obj1->GetPosition().y &&
+	//	(glm::dot(obj1->GetPosition().z, box1Min.z)) <= obj1->GetPosition().z &&
+	//	(glm::dot(obj1->GetPosition().z, box1Max.z)) <= obj1->GetPosition().z
+	//	);
+	//
+	//bool wasCollision = CheckSphereAABBCollision(obj2, obj1, collisionInfo);
+	//if (wasCollision)
+	//{
+	//	//
+	//}
+	//return collisionInfo.wasCollision;
 }
 
 bool PhysicsCollision::CheckAABBPlaneCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
 {
-	// CREATE OBJECTS
 	PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj1->GetShape();
 	PhysicsPlaneShape* pPlane = (PhysicsPlaneShape*)obj2->GetShape();
-	
-	// CHECK POSITION: AABB X, Y, Z Position/Dimensions
-	glm::vec3 box1Min = obj1->GetPosition() - pAABB->GetExtents();
-	glm::vec3 box1Max = obj1->GetPosition() + pAABB->GetExtents();
-	
-	// CHECK POSITION: Plane normal, distance
-	glm::vec3 pDistance = obj2->GetPosition();
 
-	if (obj2->GetPosition().x > box1Min.x && obj1->GetPosition().x < box1Max.x &&
-		obj2->GetPosition().y > box1Min.y && obj1->GetPosition().y < box1Max.y &&
-		obj2->GetPosition().z > box1Min.z && obj1->GetPosition().z < box1Max.z)
+	//calculate all AABB cube points
+	glm::vec3 point1 = obj1->GetPosition() + glm::vec3(-pAABB->GetExtents().x, -pAABB->GetExtents().y, -pAABB->GetExtents().z);
+	glm::vec3 point2 = obj1->GetPosition() + glm::vec3(-pAABB->GetExtents().x, -pAABB->GetExtents().y, pAABB->GetExtents().z);
+	glm::vec3 point3 = obj1->GetPosition() + glm::vec3(-pAABB->GetExtents().x, pAABB->GetExtents().y, -pAABB->GetExtents().z);
+	glm::vec3 point4 = obj1->GetPosition() + glm::vec3(-pAABB->GetExtents().x, pAABB->GetExtents().y, pAABB->GetExtents().z);
+
+	glm::vec3 point5 = obj1->GetPosition() - glm::vec3(pAABB->GetExtents().x, pAABB->GetExtents().y, pAABB->GetExtents().z);
+	glm::vec3 point6 = obj1->GetPosition() - glm::vec3(pAABB->GetExtents().x, pAABB->GetExtents().y, -pAABB->GetExtents().z);
+	glm::vec3 point7 = obj1->GetPosition() - glm::vec3(pAABB->GetExtents().x, -pAABB->GetExtents().y, pAABB->GetExtents().z);
+	glm::vec3 point8 = obj1->GetPosition() - glm::vec3(pAABB->GetExtents().x, -pAABB->GetExtents().y, -pAABB->GetExtents().z);
+
+	//float distanceFromPlane = (glm::dot(obj1->GetPosition(), pPlane->getNormal())) - pPlane->getDistance();
+
+	//Find the distance from each point to the plane
+	float distanceFromPlane1 = (glm::dot(point1, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();//GetDistance();
+	float distanceFromPlane2 = (glm::dot(point2, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
+	float distanceFromPlane3 = (glm::dot(point3, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
+	float distanceFromPlane4 = (glm::dot(point4, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
+
+	float distanceFromPlane5 = (glm::dot(point5, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
+	float distanceFromPlane6 = (glm::dot(point6, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
+	float distanceFromPlane7 = (glm::dot(point7, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
+	float distanceFromPlane8 = (glm::dot(point8, pPlane->GetNormal())) - pPlane->GetDistanceFromOrigin();
+
+	//check to see which point is the closest to the plane
+	float fSmallest = 10000000000;
+	if (distanceFromPlane1 < fSmallest) fSmallest = distanceFromPlane1;
+	if (distanceFromPlane2 < fSmallest) fSmallest = distanceFromPlane2;
+	if (distanceFromPlane3 < fSmallest) fSmallest = distanceFromPlane3;
+	if (distanceFromPlane4 < fSmallest) fSmallest = distanceFromPlane4;
+	if (distanceFromPlane5 < fSmallest) fSmallest = distanceFromPlane5;
+	if (distanceFromPlane6 < fSmallest) fSmallest = distanceFromPlane6;
+	if (distanceFromPlane7 < fSmallest) fSmallest = distanceFromPlane7;
+	if (distanceFromPlane8 < fSmallest) fSmallest = distanceFromPlane8;
+
+	//get the smallest intersecting distance and point it in the direction to reflect collision 
+	if (fSmallest < 0)
 	{
-		collisionInfo.normal = pPlane->GetNormal();
-		collisionInfo.interceptDistance = pAABB->GetExtents().x - pPlane->GetNormal().x;
-		collisionInfo.interceptDistance = pAABB->GetExtents().y - pPlane->GetNormal().y;
-		collisionInfo.interceptDistance = pAABB->GetExtents().z - pPlane->GetNormal().z;
+		collisionInfo.normal = -pPlane->GetNormal();
+		collisionInfo.interceptDistance = -fSmallest;
 		collisionInfo.wasCollision = true;
-		return true;
+		/*collisionInfo.interceptDistance = pAABB->GetDims().x - distanceFromPlane;
+		collisionInfo.interceptDistance = pAABB->GetDims().y - distanceFromPlane;
+		collisionInfo.interceptDistance = pAABB->GetDims().z - distanceFromPlane; */
 	}
 	else
 	{
 		collisionInfo.wasCollision = false;
-		return false;
 	}
+
+	return collisionInfo.wasCollision;
+	
+	//// CREATE OBJECTS
+	//PhysicsAABBShape* pAABB = (PhysicsAABBShape*)obj1->GetShape();
+	//PhysicsPlaneShape* pPlane = (PhysicsPlaneShape*)obj2->GetShape();
+	//
+	//// CHECK POSITION: AABB X, Y, Z Position/Dimensions
+	//glm::vec3 box1Min = obj1->GetPosition() - pAABB->GetExtents();
+	//glm::vec3 box1Max = obj1->GetPosition() + pAABB->GetExtents();
+	//
+	//// CHECK POSITION: Plane normal, distance
+	//glm::vec3 pDistance = obj2->GetPosition();
+	//
+	//if (obj2->GetPosition().x > box1Min.x && obj1->GetPosition().x < box1Max.x &&
+	//	obj2->GetPosition().y > box1Min.y && obj1->GetPosition().y < box1Max.y &&
+	//	obj2->GetPosition().z > box1Min.z && obj1->GetPosition().z < box1Max.z)
+	//{
+	//	collisionInfo.normal = pPlane->GetNormal();
+	//	collisionInfo.interceptDistance = pAABB->GetExtents().x - pPlane->GetNormal().x;
+	//	collisionInfo.interceptDistance = pAABB->GetExtents().y - pPlane->GetNormal().y;
+	//	collisionInfo.interceptDistance = pAABB->GetExtents().z - pPlane->GetNormal().z;
+	//	collisionInfo.wasCollision = true;
+	//	return true;
+	//}
+	//else
+	//{
+	//	collisionInfo.wasCollision = false;
+	//	return false;
+	//}
 }
 
+
+bool PhysicsCollision::CheckPlaneAABBCollision(const PhysicsObject * obj1, const PhysicsObject * obj2, CollisionInfo & collisionInfo)
+{
+	bool wasCollision = CheckAABBPlaneCollision(obj2, obj1, collisionInfo);
+	if (wasCollision)
+	{
+		collisionInfo.normal = -collisionInfo.normal;
+	}
+	return collisionInfo.wasCollision;
+}
 
 void PhysicsCollision::ResolveCollision(PhysicsObject * obj1, PhysicsObject * obj2, CollisionInfo& collisionInfo)
 {
@@ -256,45 +355,94 @@ bool PhysicsCollision::CheckAABBAABBCollision(
 	PhysicsAABBShape* pAABB1 = (PhysicsAABBShape*)obj1->GetShape();
 	PhysicsAABBShape* pAABB2 = (PhysicsAABBShape*)obj2->GetShape();
 	
-	// CHECK POSITION X, Y, Z Bounds
-	glm::vec3 box1Min = obj1->GetPosition() - pAABB1->GetExtents();
-	glm::vec3 box1Max = obj1->GetPosition() + pAABB1->GetExtents();
+	glm::vec3 max1 = obj1->GetPosition() + pAABB1->GetExtents();
+	glm::vec3 min1 = obj1->GetPosition() - pAABB1->GetExtents();
 
-	glm::vec3 box2Min = obj2->GetPosition() - pAABB2->GetExtents();
-	glm::vec3 box2Max = obj2->GetPosition() + pAABB2->GetExtents();
+	glm::vec3 max2 = obj2->GetPosition() + pAABB2->GetExtents();
+	glm::vec3 min2 = obj2->GetPosition() - pAABB2->GetExtents();
 
-	// Part1: Check Collision
-	// Is Box1 Max > Box2 Min and Box1 min < Box2 Max
-	bool isCollision = (
-		box1Min.x < box2Max.x &&
-		box1Max.x > box2Min.x &&
-		box1Min.y < box2Max.y &&
-		box1Max.y > box2Min.y &&
-		box1Min.z < box2Max.z &&
-		box1Max.z > box2Min.z
-		);
-	return isCollision;
 
-	// Part2: Using the Bool result
-	// If Collision true, find collision location on x,y,z & Store value?
-	if (isCollision = false)
+	if (max1.x > min2.x && min1.x < max2.x && max1.y > min2.y && min1.y < max2.y &&
+		max1.z > min2.z && min1.z < max2.z)
 	{
-		collisionInfo.wasCollision = false;
-		return false;
+		float x1 = max2.x - min1.x;
+		float x2 = min2.x - max1.x;
+		float y1 = max2.y - min1.y;
+		float y2 = min2.y - max1.y;
+		float z1 = max2.z - min1.z;
+		float z2 = min2.z - max1.z;
+
+
+		float fSmallestX = (abs(x1) < abs(x2)) ? x1 : x2;
+		float fSmallestY = (abs(y1) < abs(y2)) ? y1 : y2;
+		float fSmallestZ = (abs(z1) < abs(z2)) ? z1 : z2;
+
+
+		float realSmallest = fSmallestX;
+		glm::vec3 normal = glm::vec3(1, 0, 0);
+		if (abs(fSmallestY) < abs(realSmallest))
+		{
+			realSmallest = fSmallestY;
+			normal = glm::vec3(0, 1, 0);
+		}
+		if (abs(fSmallestZ) < abs(realSmallest))
+		{
+			realSmallest = fSmallestZ;
+			normal = glm::vec3(0, 0, 1);
+		}
+
+		//do collision 
+		collisionInfo.normal = normal;
+		collisionInfo.interceptDistance = -realSmallest;
+		collisionInfo.wasCollision = true;
 	}
 	else
 	{
-		collisionInfo.interceptDistance =
-				(
-				// Check X/Y/Z Min/Max
-					((box2Max.x - box2Min.x) < (box1Max.x - box1Min.x)),
-					((box2Max.y - box2Min.y) < (box1Max.y - box1Min.y)),
-					((box2Max.z - box2Min.z) < (box1Max.z - box1Min.z))
-				);
-
-		collisionInfo.wasCollision = true;
-		return true;
+		collisionInfo.wasCollision = false;
 	}
+	return collisionInfo.wasCollision;
+	
+
+	//
+	//// CHECK POSITION X, Y, Z Bounds
+	//glm::vec3 box1Min = obj1->GetPosition() - pAABB1->GetExtents();
+	//glm::vec3 box1Max = obj1->GetPosition() + pAABB1->GetExtents();
+	//
+	//glm::vec3 box2Min = obj2->GetPosition() - pAABB2->GetExtents();
+	//glm::vec3 box2Max = obj2->GetPosition() + pAABB2->GetExtents();
+	//
+	//// Part1: Check Collision
+	//// Is Box1 Max > Box2 Min and Box1 min < Box2 Max
+	//bool isCollision = (
+	//	box1Min.x < box2Max.x &&
+	//	box1Max.x > box2Min.x &&
+	//	box1Min.y < box2Max.y &&
+	//	box1Max.y > box2Min.y &&
+	//	box1Min.z < box2Max.z &&
+	//	box1Max.z > box2Min.z
+	//	);
+	//return isCollision;
+	//
+	//// Part2: Using the Bool result
+	//// If Collision true, find collision location on x,y,z & Store value?
+	//if (isCollision = false)
+	//{
+	//	collisionInfo.wasCollision = false;
+	//	return false;
+	//}
+	//else
+	//{
+	//	collisionInfo.interceptDistance =
+	//			(
+	//			// Check X/Y/Z Min/Max
+	//				((box2Max.x - box2Min.x) < (box1Max.x - box1Min.x)),
+	//				((box2Max.y - box2Min.y) < (box1Max.y - box1Min.y)),
+	//				((box2Max.z - box2Min.z) < (box1Max.z - box1Min.z))
+	//			);
+	//
+	//	collisionInfo.wasCollision = true;
+	//	return true;
+	//}
 }
 
 bool PhysicsCollision::CheckSpherePlaneCollision(
@@ -356,51 +504,72 @@ bool PhysicsCollision::CheckSphereSphereCollision(
 	PhysicsSphereShape* pSphere1 = (PhysicsSphereShape*)obj1->GetShape();
 	PhysicsSphereShape* pSphere2 = (PhysicsSphereShape*)obj2->GetShape();
 
-	// FIND DISTANCE
-	// 1. Distance Difference vector: vecd = s1.pos - s2.pos
-	glm::vec3 vDistance = (obj1->GetPosition() - obj2->GetPosition());
-	// 2. Find Length: DISTANCE = vecd.length = sqrtvecd.x^2 + vecd.y^2 + vecd.z^2
-	vDistance.x = glm::sqrt(vDistance.x);
-	vDistance.y = glm::sqrt(vDistance.y);
-	vDistance.z = glm::sqrt(vDistance.z);
+	glm::vec3 offset = obj2->GetPosition() - obj1->GetPosition();
+	float d = glm::length(offset);
 
-	float fLength = vDistance.length();
+	float min = pSphere1->GetRadius() + pSphere2->GetRadius();
 
-	// 3. SUM RADIUS: = s1.radius + s2.radius
-	float fSumRadius = (pSphere1->GetRadius() - pSphere2->GetRadius());
-
-	// Check Collision: Distance < SumRadius
-	if (fLength < fSumRadius)
+	if (d < min)
 	{
-		// Collision true
-		collisionInfo.interceptDistance = fSumRadius;
+		//then collision 
+		collisionInfo.normal = glm::normalize(offset);
+		collisionInfo.interceptDistance = min - d;
+
 		collisionInfo.wasCollision = true;
-		return true;
 	}
+
 	else
 	{
-		// !Collision
 		collisionInfo.wasCollision = false;
-		return false;
 	}
 
-	// Set C1, C2 values:
-	glm::vec3 s1CenterPoint;
-	glm::vec3 s2CenterPoint;
-	// Get C1, C2 values:
-	s1CenterPoint = (obj1->GetPosition());
-	s2CenterPoint = (obj2->GetPosition());
-	// 1. Find objects Distance: C1 - C2
-	glm::vec3 displacement = ((s1CenterPoint) - (s2CenterPoint));
-	// 2. bCollision = D < SumOf r
-		if (displacement.length < pSphere1->GetRadius() + pSphere2->GetRadius())
-		{
-			collisionInfo.wasCollision = true;
-		}
-		else
-		{
-			collisionInfo.wasCollision = false;
-		}
 	return collisionInfo.wasCollision;
+
+	//// FIND DISTANCE
+	//// 1. Distance Difference vector: vecd = s1.pos - s2.pos
+	//glm::vec3 vDistance = (obj1->GetPosition() - obj2->GetPosition());
+	//// 2. Find Length: DISTANCE = vecd.length = sqrtvecd.x^2 + vecd.y^2 + vecd.z^2
+	//vDistance.x = glm::sqrt(vDistance.x);
+	//vDistance.y = glm::sqrt(vDistance.y);
+	//vDistance.z = glm::sqrt(vDistance.z);
+	//
+	//float fLength = vDistance.length();
+	//
+	//// 3. SUM RADIUS: = s1.radius + s2.radius
+	//float fSumRadius = (pSphere1->GetRadius() - pSphere2->GetRadius());
+	//
+	//// Check Collision: Distance < SumRadius
+	//if (fLength < fSumRadius)
+	//{
+	//	// Collision true
+	//	collisionInfo.interceptDistance = fSumRadius;
+	//	collisionInfo.wasCollision = true;
+	//	return true;
+	//}
+	//else
+	//{
+	//	// !Collision
+	//	collisionInfo.wasCollision = false;
+	//	return false;
+	//}
+	//
+	//// Set C1, C2 values:
+	//glm::vec3 s1CenterPoint;
+	//glm::vec3 s2CenterPoint;
+	//// Get C1, C2 values:
+	//s1CenterPoint = (obj1->GetPosition());
+	//s2CenterPoint = (obj2->GetPosition());
+	//// 1. Find objects Distance: C1 - C2
+	//glm::vec3 displacement = ((s1CenterPoint) - (s2CenterPoint));
+	//// 2. bCollision = D < SumOf r
+	//	if (displacement.length < pSphere1->GetRadius() + pSphere2->GetRadius())
+	//	{
+	//		collisionInfo.wasCollision = true;
+	//	}
+	//	else
+	//	{
+	//		collisionInfo.wasCollision = false;
+	//	}
+	//return collisionInfo.wasCollision;
 }
 

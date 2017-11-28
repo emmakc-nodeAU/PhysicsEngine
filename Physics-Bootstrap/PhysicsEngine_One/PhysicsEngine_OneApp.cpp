@@ -58,7 +58,7 @@ bool PhysicsEngine_OneApp::startup() {
 
 	*/
 
-	// 1. SCENE:
+	// 1. SCENE: A SPHERE AND A BOX DROP INTO A BAR.. THE BAR IS A STATIC PLANE..
 	m_physicsScene = new PhysicsScene();
 
 	// 1.A: GLOBAL SCENE FORCES: Gravity
@@ -67,7 +67,7 @@ bool PhysicsEngine_OneApp::startup() {
 	// 2. PLANE: FLOOR
 	m_floor = new GameObject();
 	m_floor->SetPhysicsObject(new PhysicsObject(std::numeric_limits<float>().max())); // Mass set to max
-	m_floor->GetPhysicsObject()->AddShape(new PhysicsPlaneShape(glm::vec3(0, 1, 0), 0));
+	m_floor->GetPhysicsObject()->AddShape(new PhysicsPlaneShape(glm::normalize(glm::vec3(0.01f, 1.5f, 0.8f)), 0));
 	m_floor->GetPhysicsObject()->SetIsStatic(true);	// Floor will not move.
 
 	// 2. SPHERE: BALL
@@ -81,9 +81,29 @@ bool PhysicsEngine_OneApp::startup() {
 	// 3. CUBE: BOX
 	m_box = new GameObject();
 	m_box->SetPhysicsObject(new PhysicsObject(2.0f));
-	//m_box->GetPhysicsObject()->AddShape(new PhysicsAABBShape()->SetExtents(glm::vec3(2, 1, 3)));
-	m_box->GetPhysicsObject()->SetPosition(glm::vec3(0, 10, 0));
+	m_box->GetPhysicsObject()->AddShape(new PhysicsAABBShape(glm::vec3(.5f, .5f, .5f)));
+	m_box->GetPhysicsObject()->AddShape(new PhysicsAABBShape(glm::vec3(2, 1, 3)));
+	m_box->GetPhysicsObject()->SetPosition(glm::vec3(5, 10, 0));
 	m_box->GetPhysicsObject()->SetIsStatic(false);
+
+
+	// 4. SPHERE: BALL
+	m_ball2 = new GameObject();
+	m_ball2->SetPhysicsObject(new PhysicsObject(2.0f));
+	m_ball2->GetPhysicsObject()->SetPosition(glm::vec3(-4, 5, 0));
+	m_ball2->GetPhysicsObject()->AddShape(new PhysicsSphereShape(1.0f));
+	//m_ball->GetPhysicsObject()->SetVelocity(glm::vec3(10.0f, 25.0f, 0.0f)); // Parobolic Arc: Fire ball with projection arc.
+	m_ball2->GetPhysicsObject()->SetIsStatic(false);
+
+	// 3. CUBE: BOX
+	m_box2 = new GameObject();
+	m_box2->SetPhysicsObject(new PhysicsObject(2.0f));
+	m_box2->GetPhysicsObject()->AddShape(new PhysicsAABBShape(glm::vec3(.5f, .5f, .5f)));
+	m_box2->GetPhysicsObject()->AddShape(new PhysicsAABBShape(glm::vec3(2, 1, 3)));
+	m_box2->GetPhysicsObject()->SetPosition(glm::vec3(5, 10, 0));
+	m_box2->GetPhysicsObject()->SetIsStatic(false);
+
+
 
 	// 2. demoGameObject: Plane
 	// CREATE: Shape: Create Sphere	
@@ -97,6 +117,8 @@ bool PhysicsEngine_OneApp::startup() {
 	m_physicsScene->Add(m_floor->GetPhysicsObject());
 	m_physicsScene->Add(m_ball->GetPhysicsObject());
 	m_physicsScene->Add(m_box->GetPhysicsObject());
+	m_physicsScene->Add(m_ball2->GetPhysicsObject());
+	m_physicsScene->Add(m_box2->GetPhysicsObject());
 	return true;
 }
 
@@ -135,7 +157,8 @@ void PhysicsEngine_OneApp::update(float deltaTime) {
 	PhysicsCollision::CollisionInfo collisionInfo;
 	bool wasCollision = PhysicsCollision::CheckCollision(
 		m_floor->GetPhysicsObject(), 
-		m_ball->GetPhysicsObject(), 
+		//m_ball->GetPhysicsObject(), 
+		m_box->GetPhysicsObject(),
 		collisionInfo);
 
 	if (wasCollision)
@@ -160,10 +183,11 @@ void PhysicsEngine_OneApp::draw() {
 
 	// DRAW: GameObjects
 	//m_demoGameObject->DebugPhysicsRender();
-	m_ball->DebugPhysicsRender();
 	m_floor->DebugPhysicsRender();
-
+	m_ball->DebugPhysicsRender();
+	m_ball2->DebugPhysicsRender();
 	m_box->DebugPhysicsRender();
+	m_box2->DebugPhysicsRender();
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 }

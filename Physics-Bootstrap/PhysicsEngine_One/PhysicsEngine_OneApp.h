@@ -30,6 +30,8 @@ protected:
 	PhysicsScene* m_physicsScene;
 	GameObject* m_box;
 	GameObject* m_ball;	// previous demogameobject
+	GameObject* m_box2;
+	GameObject* m_ball2;
 	GameObject* m_floor;
 	GameObject* m_demoGameObject;
 	// camera transforms
